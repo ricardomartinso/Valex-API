@@ -11,8 +11,10 @@ export async function checkCardCreation(
   employeeId: number,
   cardType: TransactionTypes
 ) {
-  const creditCardNumber = faker.finance.creditCardNumber();
-  console.log(creditCardNumber);
+  const creditCardNumber = faker.finance.creditCardNumber(
+    "####-####-####-####"
+  );
+
   const isExistingCompanie = await findByApiKey(apiKey);
 
   const isExistingEmployee = await findById(employeeId);
