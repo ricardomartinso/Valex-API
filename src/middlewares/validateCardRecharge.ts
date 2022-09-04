@@ -1,14 +1,16 @@
 import { Request, Response, NextFunction } from "express";
-import { createCardTypeSchema } from "../schemas/cardTypeSchema";
+import { rechargeSchema } from "../schemas/rechargeSchema";
 
-export async function validateCreateCard(
+export async function validateCardRecharge(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
-  const card = req.body;
-  const validation = createCardTypeSchema.validate(card, { abortEarly: false });
+  const rechargeInfo = req.body;
 
+  const validation = rechargeSchema.validate(rechargeInfo, {
+    abortEarly: false,
+  });
   if (validation.error) {
     return res.status(422).send(
       validation.error.details.map((error) => {
