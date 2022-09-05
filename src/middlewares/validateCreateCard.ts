@@ -7,6 +7,7 @@ export async function validateCreateCard(
   next: NextFunction
 ) {
   const card = req.body;
+
   const validation = createCardTypeSchema.validate(card, { abortEarly: false });
 
   if (validation.error) {

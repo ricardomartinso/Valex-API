@@ -22,9 +22,6 @@ export async function cardCreation(
   cardType: TransactionTypes
 ) {
   const date = dayjs();
-  const privateKey = process.env.SECRET_KEY as string;
-
-  const cryptr = new Cryptr(privateKey);
 
   await isValidApiKeyCompanie(apiKey);
   const employee = await isEmployeeExist(employeeId);
@@ -34,10 +31,10 @@ export async function cardCreation(
   const cardholderName = generateCardName(employee.fullName);
   const expirationDate = date.add(5, "year").format("MM/YY");
 
-  const creditCardCvc = faker.finance.creditCardCVV();
-  const encryptedCvc = cryptr.encrypt(creditCardCvc);
+  const securityCode = faker.finance.creditCardCVV();
+  const encryptedCvc = encryptValue(securityCode);
 
-  insert({
+  const cardObject = {
     employeeId,
     number: creditCardNumber,
     cardholderName,
@@ -48,7 +45,26 @@ export async function cardCreation(
     originalCardId: undefined,
     isBlocked: true,
     type: cardType,
-  });
+  };
+
+  insert(cardObject);
+}
+
+function encryptValue(value: string) {
+  const privateKey = process.env.SECRET_KEY as string;
+  const cryptr = new Cryptr(privateKey);
+
+  const encryptedValue = cryptr.encrypt(value);
+
+  return encryptedValue;
+}
+function decryptValue(value: string) {
+  const privateKey = process.env.SECRET_KEY as string;
+  const cryptr = new Cryptr(privateKey);
+
+  const decryptedValue = cryptr.decrypt(value);
+
+  return decryptedValue;
 }
 export async function getCardBalance(card: {
   number: string;
@@ -84,18 +100,9 @@ export async function activateCard(
 
   checkCreditCardExpiration(cardDetails.expirationDate);
 
-  if (cardDetails.password !== null) {
-    throw { error: "Unauthorized", message: "Password already created" };
-  }
+  validateCreatePassword(cardDetails.password as string | null, password);
 
   checkCreditCardCvc(cardDetails.securityCode, cvc);
-
-  if (password.length !== 4) {
-    throw {
-      error: "Unauthorized",
-      message: "Password need to be 4 digits length",
-    };
-  }
 
   const encryptedPassword = cryptr.encrypt(password);
 
@@ -105,6 +112,21 @@ export async function activateCard(
   await update(cardDetails.id, cardDetails);
 }
 
+function validateCreatePassword(
+  passwordReceived: string | null,
+  passwordToCreate: string
+) {
+  if (passwordReceived !== null) {
+    throw { error: "Unauthorized", message: "Card already activated" };
+  }
+
+  if (passwordToCreate.length < 4) {
+    throw {
+      error: "Unauthorized",
+      message: "Password need to be 4 digits length",
+    };
+  }
+}
 export async function blockCard(
   password: string,
   number: string,
@@ -226,7 +248,6 @@ async function creditCardExist(card: {
 }
 export async function isValidApiKeyCompanie(apiKey: string) {
   const isApiValid = await findByApiKey(apiKey);
-
   if (!isApiValid) {
     throw { error: "NotFound", message: "Api key doesnt match any Companie!" };
   }
@@ -267,5 +288,5 @@ function generateCardName(nameToConvert: string) {
     .filter((name: string) => name !== "")
     .join(" ");
 
-  return cardName;
+  return cardName.toUpperCase();
 }

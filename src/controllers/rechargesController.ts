@@ -6,7 +6,7 @@ export async function creditCardRecharge(req: Request, res: Response) {
   const { id, amount } = req.body;
 
   if (!apiKey) {
-    return res.status(402).send("Invalid api-key");
+    return res.status(402).send("Missing api-key");
   }
 
   await cardRecharge(apiKey, Number(id), amount);
