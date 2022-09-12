@@ -17,9 +17,9 @@ export async function createCard(req: Request, res: Response) {
     return res.status(402).send("Missing api-key");
   }
 
-  await cardCreation(apiKey, employeeId, cardType);
+  const card = await cardCreation(apiKey, employeeId, cardType);
 
-  res.status(201).send("Created");
+  res.status(201).send(card);
 }
 export async function activateCreditCard(req: Request, res: Response) {
   const { number, cvc, password, cardHolderName, expirationDate } = req.body;

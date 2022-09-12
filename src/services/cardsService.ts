@@ -48,6 +48,8 @@ export async function cardCreation(
   };
 
   insert(cardObject);
+
+  return cardObject;
 }
 
 function encryptValue(value: string) {
