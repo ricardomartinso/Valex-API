@@ -47,9 +47,22 @@ export async function cardCreation(
     type: cardType,
   };
 
+  const cardObjectToReturn = {
+    employeeId,
+    number: creditCardNumber,
+    cardholderName,
+    securityCode,
+    expirationDate,
+    password: undefined,
+    isVirtual: true,
+    originalCardId: undefined,
+    isBlocked: true,
+    type: cardType,
+  };
+
   insert(cardObject);
 
-  return cardObject;
+  return cardObjectToReturn;
 }
 
 function encryptValue(value: string) {
